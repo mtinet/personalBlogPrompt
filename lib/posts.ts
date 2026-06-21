@@ -28,6 +28,8 @@ export interface Comment {
 export const MAX_FILE_MB = 20;
 export const BLOG_TITLE = process.env.NEXT_PUBLIC_BLOG_TITLE || '나의 블로그';
 
+export const isImageName = (name: string) => /\.(png|jpe?g|gif|webp|svg|bmp)$/i.test(name);
+
 export const parseTags = (s: string) =>
   Array.from(new Set(s.split(/[,\s]+/).map((t) => t.replace(/^#/, '').trim()).filter(Boolean)));
 

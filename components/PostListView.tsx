@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase-client';
 import PostComposer from './PostComposer';
 import RichBody from './RichBody';
-import { Post, fmtDate, bodySnippet } from '@/lib/posts';
+import { Post, fmtDate, bodySnippet, isImageName } from '@/lib/posts';
 
 const PAGE_SIZE = 5;
 const BASE = '/post';
@@ -173,6 +173,15 @@ export default function PostListView() {
                   <div className="relative mt-2 max-h-72 overflow-hidden text-gray-700">
                     <RichBody body={snippet} />
                     <div className="absolute bottom-0 inset-x-0 h-12 bg-gradient-to-t from-white to-transparent pointer-events-none" />
+                  </div>
+                )}
+
+                {(p.files ?? []).some((f) => isImageName(f.name)) && (
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {(p.files ?? []).filter((f) => isImageName(f.name)).map((f, i) => (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img key={i} src={f.url} alt={f.name} className="max-h-60 max-w-full rounded-lg border border-gray-200 object-contain" />
+                    ))}
                   </div>
                 )}
 
