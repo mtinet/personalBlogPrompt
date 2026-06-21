@@ -25,7 +25,10 @@ export default function RichBody({ body }: { body: string }) {
   text = text.replace(/(!\[[^\]]*\]\([^)]+\))|((?:https?:\/\/)[^\s)]+\.(?:png|jpe?g|gif|webp|svg)(?:\?[^\s)]*)?)/gi,
     (full, mdImg, bareImg) => (mdImg ? mdImg : `\n\n![](${bareImg})\n\n`));
 
-  // 3) 마크다운 → HTML (작성자는 관리자뿐이라 원문 HTML 허용)
+  // 3) 연속된 빈 줄(엔터 여러 번)을 입력한 만큼 유지(마크다운이 합치지 않도록 <br> 보강)
+  text = text.replace(/\n{2,}/g, (m) => '\n\n' + '<br>'.repeat(m.length - 2));
+
+  // 4) 마크다운 → HTML (작성자는 관리자뿐이라 원문 HTML 허용)
   const html = marked.parse(text) as string;
 
   return (
