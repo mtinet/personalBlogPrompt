@@ -62,5 +62,6 @@ database/        schema.sql
 - 마크다운은 `marked` 사용, 작성자는 관리자뿐이라 원문 HTML(색·크기·iframe) 허용
 - 유튜브는 ID를 끝에 모으지 말고 **URL 자리에 iframe 인라인 치환**(작성 위치 유지)
 - 빈 줄 보존: `marked` 전에 `text.replace(/\n{2,}/g, m => '\n\n' + '<br>'.repeat(m.length - 2))`
-- 첨부 렌더는 확장자로 분기: 이미지(`isImageName`)는 `<img>` 인라인(목록 미리보기 포함), 그 외는 다운로드 링크
+- 첨부 렌더는 확장자로 분기: 이미지(`isImageName`)는 `<img>` 인라인(상세는 풀사이즈), 그 외는 다운로드 링크
+- 목록 미리보기는 본문 스니펫+업로드 이미지를 한 `max-h-72 overflow-hidden`(페이드) 영역에 넣어 윗부분만 잘려 보이게(풀사이즈 누적 방지)
 - 목록 카드 전체 클릭 이동 시 내부 인터랙티브 요소는 `stopPropagation`
