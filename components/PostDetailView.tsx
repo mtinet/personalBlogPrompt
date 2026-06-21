@@ -113,10 +113,17 @@ export default function PostDetailView({ id }: { id: number }) {
         {(post.files ?? []).length > 0 && (
           <div className="mt-4 flex flex-col gap-1.5 items-start">
             {(post.files ?? []).map((f, i) => (
-              <a key={i} href={f.url} target="_blank" rel="noopener noreferrer" download
-                 className="inline-flex items-center gap-1.5 text-sm text-brand-700 bg-brand-50 border border-brand-200 rounded px-3 py-1.5 hover:bg-brand-100">
-                📎 {f.name}
-              </a>
+              /\.(png|jpe?g|gif|webp|svg|bmp)$/i.test(f.name) ? (
+                <a key={i} href={f.url} target="_blank" rel="noopener noreferrer" title={f.name}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={f.url} alt={f.name} className="max-w-full max-h-96 rounded-lg border border-gray-200 object-contain" />
+                </a>
+              ) : (
+                <a key={i} href={f.url} target="_blank" rel="noopener noreferrer" download
+                   className="inline-flex items-center gap-1.5 text-sm text-brand-700 bg-brand-50 border border-brand-200 rounded px-3 py-1.5 hover:bg-brand-100">
+                  📎 {f.name}
+                </a>
+              )
             ))}
           </div>
         )}
