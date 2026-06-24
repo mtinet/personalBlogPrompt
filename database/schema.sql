@@ -63,4 +63,32 @@ create policy blog_write  on storage.objects for insert to authenticated with ch
 create policy blog_update on storage.objects for update to authenticated using (bucket_id = 'blog' and is_admin());
 create policy blog_delete on storage.objects for delete to authenticated using (bucket_id = 'blog' and is_admin());
 
+-- 조회수 + 다운로드 횟수 -------------------------------------
+alter table posts add column if not exists views int not null default 0;
+
+create or replace function increment_post_view(p_id int) returns void
+  language plpgsql security definer set search_path = public as $$
+  begin update posts set views = views + 1 where id = p_id; end;
+$$;
+grant execute on function increment_post_view(int) to anon, authenticated;
+
+create table if not exists file_downloads (
+  post_id int not null references posts(id) on delete cascade,
+  file_url text not null,
+  count int not null default 0,
+  primary key (post_id, file_url)
+);
+alter table file_downloads enable row level security;
+drop policy if exists file_downloads_read on file_downloads;
+create policy file_downloads_read on file_downloads for select to anon, authenticated using (true);
+
+create or replace function increment_download(p_post_id int, p_url text) returns void
+  language plpgsql security definer set search_path = public as $$
+  begin
+    insert into file_downloads(post_id, file_url, count) values (p_post_id, p_url, 1)
+    on conflict (post_id, file_url) do update set count = file_downloads.count + 1;
+  end;
+$$;
+grant execute on function increment_download(int, text) to anon, authenticated;
+
 select '개인 블로그 스키마 적용 완료' as result;

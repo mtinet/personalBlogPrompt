@@ -11,6 +11,7 @@ export interface Post {
   tags: string[] | null;
   comments_locked: boolean;
   comments_hidden: boolean;
+  views: number;
   author_name: string | null;
   created_at: string;
   updated_at: string;

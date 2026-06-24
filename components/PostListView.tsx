@@ -157,6 +157,7 @@ export default function PostListView() {
                     </Link>
                     <p className="text-xs text-gray-500 mt-0.5">
                       {fmtDate(p.created_at)}
+                      <span className="ml-1.5">👁 {p.views ?? 0}</span>
                       {(p.files ?? []).length > 0 && <span className="ml-1.5">📎 {(p.files ?? []).length}</span>}
                       {(counts[p.id] ?? 0) > 0 && <span className="ml-1.5">💬 {counts[p.id]}</span>}
                     </p>

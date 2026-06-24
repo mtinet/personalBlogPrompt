@@ -21,6 +21,7 @@ export default function PostDetailView({ id }: { id: number }) {
   const [editing, setEditing] = useState(false);
   const [cInput, setCInput] = useState('');
   const [cName, setCName] = useState('');
+  const [downloads, setDownloads] = useState<Record<string, number>>({});
 
   const loadPost = async () => {
     const { data } = await supabase.from('posts').select('*').eq('id', id).single();
@@ -31,6 +32,17 @@ export default function PostDetailView({ id }: { id: number }) {
     const { data } = await supabase.from('comments').select('*').eq('post_id', id).order('created_at', { ascending: true });
     setComments((data ?? []) as Comment[]);
   };
+  const loadDownloads = async () => {
+    const { data } = await supabase.from('file_downloads').select('file_url, count').eq('post_id', id);
+    const m: Record<string, number> = {};
+    (data ?? []).forEach((d: { file_url: string; count: number }) => { m[d.file_url] = d.count; });
+    setDownloads(m);
+  };
+
+  const onDownload = async (url: string) => {
+    setDownloads((prev) => ({ ...prev, [url]: (prev[url] ?? 0) + 1 }));
+    await supabase.rpc('increment_download', { p_post_id: id, p_url: url });
+  };
 
   useEffect(() => {
     (async () => {
@@ -40,7 +52,12 @@ export default function PostDetailView({ id }: { id: number }) {
         const { data } = await supabase.rpc('is_admin'); setCanWrite(!!data);
       }
     })();
-    loadPost(); loadComments();
+    const vk = `viewed_post_${id}`;
+    if (!sessionStorage.getItem(vk)) {
+      sessionStorage.setItem(vk, '1');
+      supabase.rpc('increment_post_view', { p_id: id }).then(() => loadPost());
+    }
+    loadPost(); loadComments(); loadDownloads();
     const ch = supabase.channel(`post-detail-${id}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'posts' }, () => loadPost())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'comments' }, () => loadComments())
@@ -98,7 +115,7 @@ export default function PostDetailView({ id }: { id: number }) {
             <h1 className="text-xl font-bold flex items-center gap-1.5">
               {post.pinned && <span className="badge text-xs">📌</span>}{post.title}
             </h1>
-            <p className="text-xs text-gray-500 mt-1">{fmtDate(post.created_at)}</p>
+            <p className="text-xs text-gray-500 mt-1">{fmtDate(post.created_at)} · 👁 조회 {post.views ?? 0}</p>
           </div>
           {canWrite && (
             <div className="flex gap-2 shrink-0">
@@ -119,9 +136,9 @@ export default function PostDetailView({ id }: { id: number }) {
                   <img src={f.url} alt={f.name} className="max-w-full max-h-96 rounded-lg border border-gray-200 object-contain" />
                 </a>
               ) : (
-                <a key={i} href={f.url} target="_blank" rel="noopener noreferrer" download
+                <a key={i} href={f.url} target="_blank" rel="noopener noreferrer" download onClick={() => onDownload(f.url)}
                    className="inline-flex items-center gap-1.5 text-sm text-brand-700 bg-brand-50 border border-brand-200 rounded px-3 py-1.5 hover:bg-brand-100">
-                  📎 {f.name}
+                  📎 {f.name} <span className="text-gray-400">⬇ {downloads[f.url] ?? 0}</span>
                 </a>
               )
             ))}
