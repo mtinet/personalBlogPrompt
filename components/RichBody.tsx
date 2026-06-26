@@ -18,7 +18,7 @@ export default function RichBody({ body }: { body: string }) {
   let text = body;
 
   // 1) 유튜브 URL → 그 자리에 임베드(주소 텍스트는 제거)
-  const ytRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([\w-]{11})[^\s)]*/g;
+  const ytRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|live\/|shorts\/)|youtu\.be\/)([\w-]{11})[^\s)]*/g;
   text = text.replace(ytRegex, (_full, id: string) => ytEmbed(id));
 
   // 2) 맨 URL 이미지 → 그 자리에 마크다운 이미지(주소 대신 이미지)
